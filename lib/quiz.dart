@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_project/data/questions.dart';
 import 'package:quiz_project/questions_screen.dart';
+import 'package:quiz_project/result_screen.dart';
 import 'package:quiz_project/start_screen.dart';
 
 class Quiz extends StatefulWidget {
@@ -13,15 +15,39 @@ class Quiz extends StatefulWidget {
 class _QuizState extends State<Quiz> {
   Widget? activeScreen;
 
+  final List<String> selectedOptions = [];
+
   @override
   void initState() {
     activeScreen = StartScreen(switchScreen);
     super.initState();
   }
 
+  void chooseOption(String option) {
+    selectedOptions.add(option);
+    setState(() {
+      if (selectedOptions.length == questions.length) {
+        activeScreen = ResultScreen(
+          selectedOptions: selectedOptions,
+          restart: startAgain,
+        );
+      }
+    });
+  }
+
+  void startAgain() {
+    setState(() {
+      selectedOptions.clear(); // 👈 resets previous answers
+      activeScreen = StartScreen(switchScreen);
+    });
+  }
+
   void switchScreen() {
     setState(() {
-      activeScreen = const QuestionsScreen();
+      activeScreen = QuestionsScreen(
+        chooseOption: chooseOption,
+        restart: startAgain,
+      );
     });
   }
 
@@ -37,7 +63,7 @@ class _QuizState extends State<Quiz> {
                 Color.fromARGB(255, 246, 169, 125), // caramel peach
               ],
               begin: Alignment.topCenter,
-              end: Alignment.bottomCenter
+              end: Alignment.bottomCenter,
             ),
           ),
           child: activeScreen,
